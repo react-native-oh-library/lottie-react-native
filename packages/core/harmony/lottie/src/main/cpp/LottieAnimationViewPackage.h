@@ -32,7 +32,7 @@ public:
 
     ComponentJSIBinderByString createComponentJSIBinderByName() override;
 
-    EventEmitRequestHandlers createEventEmitRequestHandlers() override;
+    EventEmitRequestHandlers createEventEmitRequestHandlers() override
     {
         return {std::make_shared<LottieAnimationViewEventRequestHandler>()};
     }

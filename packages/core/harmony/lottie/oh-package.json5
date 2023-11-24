@@ -4,7 +4,7 @@
   "devDependencies": {
     "rnoh": "file:../rnoh"
   },
-  "name": "rnoh-svg",
+  "name": "rnoh-lottie",
   "description": "Native part of lottie-react-native",
   "main": "Index.ets",
   "version": "0.0.1",

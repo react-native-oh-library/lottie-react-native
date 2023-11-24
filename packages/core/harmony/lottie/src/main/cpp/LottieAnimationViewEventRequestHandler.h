@@ -41,7 +41,7 @@ class LottieAnimationViewEventRequestHandler : public EventEmitRequestHandler {
 public:
     void handleEvent(EventEmitRequestHandler::Context const &ctx) override
     {
-        if (ctx.event.Name != "LottieAnimationView") {
+        if (ctx.eventName != "LottieAnimationView") {
             return;
         }
         ArkJS arkJs(ctx.env);
