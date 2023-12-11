@@ -9,6 +9,6 @@
   "main": "Index.ets",
   "version": "0.0.1",
   "dependencies": {
-    "@ohos/lottie": "^2.0.5"
+    "@ohos/lottie": "2.0.5"
   }
 }

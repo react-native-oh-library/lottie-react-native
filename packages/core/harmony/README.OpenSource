@@ -1,0 +1,20 @@
+[
+    {
+        "Name": "@ohos/lottie",
+        "License": "MIT License",
+        "License File": "https://gitee.com/openharmony-tpc/lottieArkTS/blob/master/NOTICE",
+        "Version Number": "2.0.5",
+        "Owner": "xiafeng@huawei.com"
+        "Upstream URL": "https://gitee.com/openharmony-tpc",
+        "Description": "lottie是一个适用于OpenHarmony的动画库，它可以解析Adobe After Effects软件通过Bodymovin插件导出的json格式的动画，并在移动设备上进行本地渲染"
+    },
+	{
+        "Name": "lottie-react-native",
+        "License": "Apache License",
+        "License File": "https://github.com/lottie-react-native/lottie-react-native/blob/master/LICENSE",
+        "Version Number": "6.0.1",
+        "Owner": "emiliorodriguez@gmail.com"
+        "Upstream URL": "https://github.com/react-native-community",
+        "Description": "Lottie wrapper for React Native"
+    }
+]
