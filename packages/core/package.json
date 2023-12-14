@@ -1,6 +1,6 @@
 {
   "name": "@react-native-oh-tpl/lottie-react-native",
-  "version": "6.4.1-0.0.1",
+  "version": "6.4.1-0.0.2",
   "description": "React Native bindings for Lottie",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
@@ -22,6 +22,9 @@
   ],
   "author": "Emilio Rodriguez <emiliorodriguez@gmail.com>",
   "homepage": "https://github.com/airbnb/lottie-react-native#readme",
+  "harmony": {
+    "alias": "lottie-react-native"
+  },
   "license": "Apache-2.0",
   "keywords": [
     "lottie",
@@ -35,7 +38,8 @@
     "url": "https://github.com/react-native-oh-library/lottie-react-native/issues"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+	"access": "public"
   },
   "scripts": {
     "build": "bob build",
