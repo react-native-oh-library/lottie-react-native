@@ -105,7 +105,7 @@ Codegen animations are supported by adding LottieAnimation items to your project
 
 ```js
 // js
-<LottieView source={"MyAnimation"} />
+<LottieView source={'MyAnimation'} />
 ```
 
 Codegen is available to both C# and C++ applications. Dynamic loading of JSON strings at runtime is currently only supported in C# applications.
@@ -117,12 +117,12 @@ Codegen is available to both C# and C++ applications. Dynamic loading of JSON st
 Lottie can be used in a declarative way:
 
 ```jsx
-import React from "react";
-import LottieView from "lottie-react-native";
+import React from 'react';
+import LottieView from 'lottie-react-native';
 
 export default function Animation() {
   return (
-    <LottieView source={require("../path/to/animation.json")} autoPlay loop />
+    <LottieView source={require('../path/to/animation.json')} autoPlay loop />
   );
 }
 ```
@@ -130,8 +130,8 @@ export default function Animation() {
 Additionally, there is an imperative API which is sometimes simpler.
 
 ```tsx
-import React, { useEffect, useRef } from "react";
-import LottieView from "lottie-react-native";
+import React, { useEffect, useRef } from 'react';
+import LottieView from 'lottie-react-native';
 
 export default function AnimationWithImperativeApi() {
   const animationRef = useRef<LottieView>(null);
@@ -146,7 +146,7 @@ export default function AnimationWithImperativeApi() {
   return (
     <LottieView
       ref={animationRef}
-      source={require("../path/to/animation.json")}
+      source={require('../path/to/animation.json')}
     />
   );
 }
@@ -155,9 +155,9 @@ export default function AnimationWithImperativeApi() {
 Lottie's animation view can be controlled by either React Native Animated or Reanimated API.
 
 ```tsx
-import React, { useEffect, useRef, Animated } from "react";
-import { Animated, Easing } from "react-native";
-import LottieView from "lottie-react-native";
+import React, { useEffect, useRef, Animated } from 'react';
+import { Animated, Easing } from 'react-native';
+import LottieView from 'lottie-react-native';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
@@ -175,7 +175,7 @@ export default function ControllingAnimationProgress() {
 
   return (
     <AnimatedLottieView
-      source={require("../path/to/animation.json")}
+      source={require('../path/to/animation.json')}
       progress={animationProgress.current}
     />
   );
@@ -187,21 +187,21 @@ Changing color of layers:
 NOTE: This feature may not work properly on Android. We will try fix it soon.
 
 ```jsx
-import React from "react";
-import LottieView from "lottie-react-native";
+import React from 'react';
+import LottieView from 'lottie-react-native';
 
 export default function ChangingColorOfLayers() {
   return (
     <LottieView
-      source={require("../path/to/animation.json")}
+      source={require('../path/to/animation.json')}
       colorFilters={[
         {
-          keypath: "button",
-          color: "#F00000",
+          keypath: 'button',
+          color: '#F00000',
         },
         {
-          keypath: "Sending Loader",
-          color: "#F00000",
+          keypath: 'Sending Loader',
+          color: '#F00000',
         },
       ]}
       autoPlay
@@ -216,7 +216,7 @@ export default function ChangingColorOfLayers() {
 You need to modify your `metro.config.js` file accordingly by adding `lottie` extension to the `assetExts` array:
 
 ```js
-const { getDefaultConfig, mergeConfig } = require("@react-native/metro-config");
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const defaultConfig = getDefaultConfig(__dirname);
 
@@ -228,7 +228,7 @@ const defaultConfig = getDefaultConfig(__dirname);
  */
 const config = {
   resolver: {
-    assetExts: [...defaultConfig.resolver.assetExts, "lottie"],
+    assetExts: [...defaultConfig.resolver.assetExts, 'lottie'],
   },
 };
 
@@ -240,7 +240,7 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config);
 Create a file in the following path `__mocks__/lottieMock.js` and add the following code:
 
 ```js
-module.exports = "lottie-test-file-stub";
+module.exports = 'lottie-test-file-stub';
 ```
 
 Then add the following to your `jest.config.js` file:
