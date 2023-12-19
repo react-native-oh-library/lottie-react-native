@@ -14,7 +14,7 @@
     "android",
     "ios",
     "harmony",
-	"!harmony/oh_modules",
+    "!harmony/oh_modules",
     "!harmony/**/build",
     "!harmony/**/oh_modules",
     "*.podspec",
@@ -39,7 +39,7 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
-	"access": "public"
+    "access": "public"
   },
   "scripts": {
     "build": "bob build",
@@ -64,9 +64,6 @@
     "react-native-windows": {
       "optional": true
     }
-  },
-  "dependencies": {
-	"lottie-react-native": "6.4.1"
   },
   "devDependencies": {
     "@dotlottie/react-player": "^1.6.1",
@@ -133,5 +130,8 @@
         "infile": "../../CHANGELOG.md"
       }
     }
+  },
+  "dependencies": {
+    "lottie-react-native": "6.4.1"
   }
 }
