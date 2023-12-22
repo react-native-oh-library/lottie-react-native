@@ -29,7 +29,7 @@ import { AnimationObject, LottieViewProps } from './common/AnimationType'
 import { LottieCompositionCache } from './LottieCompositionCache'
 import { convertImageFolder } from './LottieAnimationTools'
 import { getHashCode } from './common/TextUtils'
-import { ViewModifier } from '/rnoh/src/main/ets/RNOHCorePackage/componentAttributeModifiers/ViewModifier'
+import { ViewModifier } from 'rnoh/src/main/ets/RNOHCorePackage/componentAttributeModifiers/ViewModifier'
 
 export const LOTTIE_TYPE: string = "LottieAnimationView"
 
