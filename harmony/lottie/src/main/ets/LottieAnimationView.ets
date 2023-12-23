@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Descriptor,
-  ComponentBuilderContext,
-  RNOHContext,
-  ViewDescriptorWrapper,
-  ViewBaseDescriptor,
-  RNViewManager
-} from 'rnoh'
+import { Descriptor, ComponentBuilderContext, RNOHContext, RNViewBase } from 'rnoh'
 import lottie from '@ohos/lottie'
 import { AnimationItem } from '@ohos/lottie'
 import http from '@ohos.net.http'
@@ -29,8 +22,6 @@ import { AnimationObject, LottieViewProps } from './common/AnimationType'
 import { LottieCompositionCache } from './LottieCompositionCache'
 import { convertImageFolder } from './LottieAnimationTools'
 import { getHashCode } from './common/TextUtils'
-//import { ViewModifier } from 'rnoh/src/main/ets/RNOHCorePackage/componentAttributeModifiers/ViewModifier'
-import { ViewModifier } from './ViewModifier'
 
 export const LOTTIE_TYPE: string = "LottieAnimationView"
 
@@ -42,9 +33,7 @@ export struct LottieAnimationView {
   tag: number = 0
   @BuilderParam buildCustomComponent: (componentBuilderContext: ComponentBuilderContext) => void
   @State descriptor: LottieViewDescriptor = {} as LottieViewDescriptor
-
-  @State descriptorWrapper:ViewDescriptorWrapper | undefined = undefined
-  public componentManager!: RNViewManager
+  private unregisterDescriptorChangesListener?: () => void = undefined
   @State @Watch("onStateChanged") progress: number = 0
   @State @Watch("onStateChanged") speed: number = 1
   @State @Watch("onStateChanged") loop: boolean = true
@@ -52,17 +41,13 @@ export struct LottieAnimationView {
   @State @Watch("onStateChanged") cacheComposition: boolean = true
   private jsonData: AnimationObject | null = {} as AnimationObject
   private jsonDataHashCode: string = ''
-  // private cleanupCommandCallback?: () => void = undefined
-  private unregisterDescriptorChangesListener?: () => void = undefined
-  private unregisterComponentManager?: () => void = undefined
-  private unregisterCommandCallback?: () => void = undefined
+  private cleanupCommandCallback?: () => void = undefined
   private renderingSettings: RenderingContextSettings = new RenderingContextSettings(true)
   private canvasRenderingContext: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.renderingSettings)
   private animateItem: AnimationItem | null = null
   private lottieCache = LottieCompositionCache.getInstance()
 
   aboutToAppear() {
-    this.initComponent()
     this.descriptor = this.ctx.descriptorRegistry.getDescriptor<LottieViewDescriptor>(this.tag)
     this.onDescriptorChanged()
     this.commandCallback()
@@ -70,36 +55,20 @@ export struct LottieAnimationView {
   }
 
   aboutToDisappear() {
+    this.cleanupCommandCallback?.()
     this.unregisterDescriptorChangesListener?.()
-    this.unregisterComponentManager?.()
-    this.unregisterCommandCallback?.()
     this.destroyAnimation()
-  }
-
-  initComponent() {
-    let descriptor = this.ctx.descriptorRegistry.getDescriptor<ViewBaseDescriptor>(this.tag)
-    if(!this.componentManager){
-      this.componentManager = new RNViewManager(this.tag,this.ctx)
-    }
-    this.unregisterComponentManager = this.ctx.componentManagerRegistry.registerComponentManager(this.tag,this.componentManager)
-    this.setDescriptorWrapper(descriptor)
-    const parentTag = descriptor.parentTag
-    this.componentManager.setParentTag(parentTag)
   }
 
   subscribeToDescriptorChanges(): void {
     this.unregisterDescriptorChangesListener = this.ctx.descriptorRegistry.subscribeToDescriptorChanges(this.tag,
       (newDescriptor: object) => {
         this.descriptor = (newDescriptor as LottieViewDescriptor)
-        this.setDescriptorWrapper(newDescriptor as ViewBaseDescriptor)
         this.onDescriptorChanged(true)
       }
     )
   }
 
-  setDescriptorWrapper(descriptor: ViewBaseDescriptor){
-    this.descriptorWrapper = new ViewDescriptorWrapper(descriptor)
-  }
   onDescriptorChanged(change?: boolean): void {
     if (this.descriptor.props) {
       this.updateWatchData()
@@ -290,7 +259,7 @@ export struct LottieAnimationView {
   }
 
   commandCallback(): void {
-    this.unregisterCommandCallback = this.ctx.componentCommandReceiver.registerCommandCallback(
+    this.cleanupCommandCallback = this.ctx.commandDispatcher.registerCommandCallback(
       this.tag,
       (command: string, args: object) => {
         if (this.animateItem == null) {
@@ -355,14 +324,12 @@ export struct LottieAnimationView {
   }
 
   build() {
-    Stack(){
+    RNViewBase({ ctx: this.ctx, tag: this.tag }) {
       Canvas(this.canvasRenderingContext)
         .width('100%')
         .height('100%')
         .onReady(() => this.parseSourceURL())
         .onAreaChange(() => this.resize())
     }
-    .attributeModifier(ViewModifier.getInstance().setDescriptor(this.descriptorWrapper))
-    .id(this.tag.toString())
   }
 }
