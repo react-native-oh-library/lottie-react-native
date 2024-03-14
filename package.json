@@ -1,6 +1,6 @@
 {
   "name": "@react-native-oh-tpl/lottie-react-native",
-  "version": "6.4.1-0.0.7",
+  "version": "6.4.1-0.1.0",
   "description": "React Native bindings for Lottie",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
