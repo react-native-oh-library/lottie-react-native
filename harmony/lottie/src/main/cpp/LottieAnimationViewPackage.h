@@ -18,25 +18,53 @@
 #define LOTTIE_SRC_MAIN_CPP_LOTTIEANIMATIONVIEWPACKAGE_H
 
 #include "RNOH/Package.h"
+#include "ComponentDescriptor.h"
+#include "LottieAnimationViewNapiBinder.h"
+#include "LottieAnimationViewJSIBinder.h"
 #include "LottieAnimationViewEventRequestHandler.h"
+#include "RNOH/ArkTSComponentInstance.h"
 
-namespace rnoh{
+using namespace rnoh;
+using namespace facebook;
 
-class LottieAnimationViewPackage : public Package {
+class LottieAnimationViewComponentInstanceFactoryDelegate : public ComponentInstanceFactoryDelegate {
 public:
-    explicit LottieAnimationViewPackage(Package::Context ctx) : Package(ctx){}
+    using ComponentInstanceFactoryDelegate::ComponentInstanceFactoryDelegate;
 
-    std::vector<facebook::react::ComponentDescriptorProvider> createComponentDescriptorProviders() override;
-
-    ComponentNapiBinderByString createComponentNapiBinderByName() override;
-
-    ComponentJSIBinderByString createComponentJSIBinderByName() override;
-
-    EventEmitRequestHandlers createEventEmitRequestHandlers() override
-    {
-        return {std::make_shared<LottieAnimationViewEventRequestHandler>()};
+    ComponentInstance::Shared create(ComponentInstanceFactoryContext ctx) override {
+        if (ctx.componentName == "LottieAnimationView") {
+            return std::make_shared<ArkTSComponentInstance>(m_ctx, ctx.tag);
+        }
+        return nullptr;
     }
 };
+
+namespace rnoh {
+
+    class LottieAnimationViewPackage : public Package {
+    public:
+        explicit LottieAnimationViewPackage(Package::Context ctx) : Package(ctx) {}
+
+        ComponentInstanceFactoryDelegate::Shared createComponentInstanceFactoryDelegate() override {
+            return std::make_shared<LottieAnimationViewComponentInstanceFactoryDelegate>(m_ctx);
+        }
+
+        std::vector<facebook::react::ComponentDescriptorProvider> createComponentDescriptorProviders() override {
+            return {react::concreteComponentDescriptorProvider<react::LottieAnimationViewComponentDescriptor>()};
+        }
+
+        ComponentNapiBinderByString createComponentNapiBinderByName() override {
+            return {{"LottieAnimationView", std::make_shared<LottieAnimationViewNapiBinder>()}};
+        }
+
+        ComponentJSIBinderByString createComponentJSIBinderByName() override {
+            return {{"LottieAnimationView", std::make_shared<LottieAnimationViewJSIBinder>()}};
+        };
+
+        EventEmitRequestHandlers createEventEmitRequestHandlers() override {
+            return {std::make_shared<LottieAnimationViewEventRequestHandler>()};
+        }
+    };
 } // namespace rnoh
 
-#endif 
+#endif

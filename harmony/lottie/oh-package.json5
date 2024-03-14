@@ -6,7 +6,7 @@
   "name": "rnoh-lottie",
   "description": "Native part of lottie-react-native",
   "main": "index.ets",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "dependencies": {
     "rnoh": "file:../rnoh",
     "@ohos/lottie": "2.0.5"

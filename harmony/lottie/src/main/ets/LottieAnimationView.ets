@@ -31,7 +31,6 @@ export type LottieViewDescriptor = Descriptor<"LottieAnimationView", LottieViewP
 export struct LottieAnimationView {
   ctx!: RNOHContext
   tag: number = 0
-  @BuilderParam buildCustomComponent: (componentBuilderContext: ComponentBuilderContext) => void
   @State descriptor: LottieViewDescriptor = {} as LottieViewDescriptor
   private unregisterDescriptorChangesListener?: () => void = undefined
   @State @Watch("onStateChanged") progress: number = 0
