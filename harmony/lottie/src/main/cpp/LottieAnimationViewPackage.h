@@ -22,15 +22,32 @@
 #include "LottieAnimationViewNapiBinder.h"
 #include "LottieAnimationViewJSIBinder.h"
 #include "LottieAnimationViewEventRequestHandler.h"
+#include "RNOH/ArkTSComponentInstance.h"
 
 using namespace rnoh;
 using namespace facebook;
+
+class LottieAnimationViewComponentInstanceFactoryDelegate : public ComponentInstanceFactoryDelegate {
+public:
+    using ComponentInstanceFactoryDelegate::ComponentInstanceFactoryDelegate;
+
+    ComponentInstance::Shared create(ComponentInstance::Context ctx) override {
+        if (ctx.componentName == "LottieAnimationView") {
+            return std::make_shared<ArkTSComponentInstance>(ctx);
+        }
+        return nullptr;
+    }
+};
 
 namespace rnoh {
 
     class LottieAnimationViewPackage : public Package {
     public:
         explicit LottieAnimationViewPackage(Package::Context ctx) : Package(ctx) {}
+
+        ComponentInstanceFactoryDelegate::Shared createComponentInstanceFactoryDelegate() override {
+            return std::make_shared<LottieAnimationViewComponentInstanceFactoryDelegate>(m_ctx);
+        }
 
         std::vector<facebook::react::ComponentDescriptorProvider> createComponentDescriptorProviders() override {
             return {react::concreteComponentDescriptorProvider<react::LottieAnimationViewComponentDescriptor>()};
