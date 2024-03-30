@@ -3,10 +3,10 @@
   "types": "",
   "devDependencies": {
   },
-  "name": "rnoh-lottie",
-  "description": "c-api-foundation",
+  "name": "@react-native-oh-tpl/lottie-react-native",
+  "description": "",
   "main": "index.ets",
-  "version": "6.4.1-0.1.0",
+  "version": "6.4.1-0.1.3",
   "dependencies": {
     "rnoh": "file:../rnoh",
     "@ohos/lottie": "2.0.5"
