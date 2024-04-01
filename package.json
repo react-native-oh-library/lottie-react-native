@@ -41,6 +41,7 @@
   },
   "scripts": {
     "build": "bob build",
+    "prepack": "npm run build",
     "release": "release-it",
     "lint:swift": "swiftlint ios",
     "lint-fix:swift": "swiftlint --fix ios"

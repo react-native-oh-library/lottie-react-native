@@ -258,7 +258,7 @@ export struct LottieAnimationView {
   }
 
   commandCallback(): void {
-    this.cleanupCommandCallback = this.ctx.commandDispatcher.registerCommandCallback(
+    this.cleanupCommandCallback = this.ctx.componentCommandReceiver.registerCommandCallback(
       this.tag,
       (command: string, args: object) => {
         if (this.animateItem == null) {
