@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Descriptor, ComponentBuilderContext, RNOHContext, RNViewBase } from 'rnoh'
+import { Descriptor, ComponentBuilderContext, RNOHContext, RNViewBase } from '@rnoh/react-native-openharmony'
 import lottie from '@ohos/lottie'
 import { AnimationItem } from '@ohos/lottie'
 import http from '@ohos.net.http'

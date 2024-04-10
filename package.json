@@ -1,6 +1,6 @@
 {
   "name": "@react-native-oh-tpl/lottie-react-native",
-  "version": "6.4.1-0.1.3",
+  "version": "6.4.1-0.1.1",
   "description": "c-api-foundation",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
