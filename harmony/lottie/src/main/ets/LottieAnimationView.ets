@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Descriptor, ComponentBuilderContext, RNOHContext, RNViewBase } from 'rnoh'
+import { Descriptor, ComponentBuilderContext, RNOHContext, RNViewBase } from '@rnoh/react-native-openharmony'
 import lottie from '@ohos/lottie'
 import { AnimationItem } from '@ohos/lottie'
 import http from '@ohos.net.http'
@@ -31,7 +31,6 @@ export type LottieViewDescriptor = Descriptor<"LottieAnimationView", LottieViewP
 export struct LottieAnimationView {
   ctx!: RNOHContext
   tag: number = 0
-  @BuilderParam buildCustomComponent: (componentBuilderContext: ComponentBuilderContext) => void
   @State descriptor: LottieViewDescriptor = {} as LottieViewDescriptor
   private unregisterDescriptorChangesListener?: () => void = undefined
   @State @Watch("onStateChanged") progress: number = 0
@@ -259,7 +258,7 @@ export struct LottieAnimationView {
   }
 
   commandCallback(): void {
-    this.cleanupCommandCallback = this.ctx.commandDispatcher.registerCommandCallback(
+    this.cleanupCommandCallback = this.ctx.componentCommandReceiver.registerCommandCallback(
       this.tag,
       (command: string, args: object) => {
         if (this.animateItem == null) {

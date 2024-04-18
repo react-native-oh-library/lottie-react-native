@@ -3,12 +3,12 @@
   "types": "",
   "devDependencies": {
   },
-  "name": "rnoh-lottie",
+  "name": "@react-native-oh-tpl/lottie-react-native",
   "description": "Native part of lottie-react-native",
   "main": "index.ets",
-  "version": "0.0.4",
+  "version": "6.4.1-0.1.2",
   "dependencies": {
-    "rnoh": "file:../rnoh",
+    "@rnoh/react-native-openharmony": "file:../react_native_openharmony",
     "@ohos/lottie": "2.0.5"
   }
 }

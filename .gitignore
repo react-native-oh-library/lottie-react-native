@@ -61,3 +61,5 @@ example/windows/**/ARM64
 
 # Bundle artifact
 *.jsbundle
+
+*.tgz
