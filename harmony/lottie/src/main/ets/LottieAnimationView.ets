@@ -140,6 +140,9 @@ export struct LottieAnimationView {
   }
 
   parseSourceURL(): void {
+    if (!this.descriptor?.props) {
+      return;
+    }
     if (this.descriptor.props.sourceURL.startsWith('http')) {
       this.cacheProcessing(this.descriptor.props.sourceURL, true)
     } else {
