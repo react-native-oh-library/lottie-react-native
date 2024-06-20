@@ -22,6 +22,7 @@ import { AnimationObject, LottieViewProps } from './common/AnimationType'
 import { LottieCompositionCache } from './LottieCompositionCache'
 import { convertImageFolder } from './LottieAnimationTools'
 import { getHashCode } from './common/TextUtils'
+import Logger from './Logger';
 
 export const LOTTIE_TYPE: string = "LottieAnimationView"
 
@@ -44,7 +45,8 @@ export struct LottieAnimationView {
   private renderingSettings: RenderingContextSettings = new RenderingContextSettings(true)
   private canvasRenderingContext: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.renderingSettings)
   private animateItem: AnimationItem | null = null
-  private lottieCache = LottieCompositionCache.getInstance()
+  private lottieCache = LottieCompositionCache.getInstance();
+  private animateKey: string | null = null;
 
   aboutToAppear() {
     this.descriptor = this.ctx.descriptorRegistry.getDescriptor<LottieViewDescriptor>(this.tag)
@@ -56,7 +58,11 @@ export struct LottieAnimationView {
   aboutToDisappear() {
     this.cleanupCommandCallback?.()
     this.unregisterDescriptorChangesListener?.()
-    this.destroyAnimation()
+    this.destroyAnimation();
+    if (this.animateKey) {
+      lottie.destroy(this.animateKey);
+    }
+    this.animateKey = null;
   }
 
   subscribeToDescriptorChanges(): void {
@@ -151,17 +157,17 @@ export struct LottieAnimationView {
   }
 
   request(url: string, hashCode?: string): void {
-    console.info('httpRequest.request url:' + JSON.stringify(url))
+    Logger.debug('httpRequest.request url:' + JSON.stringify(url))
     const httpRequest = http.createHttp()
     httpRequest.request(url, { header: { 'Content-Type': 'application/json' } }, (err, data) => {
       if (err == undefined && data != undefined) {
-        console.info('httpRequest.request success:' + JSON.stringify(data))
+        Logger.debug('httpRequest.request success:' + JSON.stringify(data))
         const result: Object = data.result
         if (result) {
           this.updateJsonData(result as string, hashCode)
         }
       } else {
-        console.info('httpRequest.request error:' + JSON.stringify(err))
+        Logger.error('httpRequest.request error:' + JSON.stringify(err))
       }
     })
   }
@@ -211,15 +217,17 @@ export struct LottieAnimationView {
     if (this.animateItem.isPaused === false) {
       this.onAnimationEnd()
     }
-    this.animateItem.destroy()
+    lottie.destroy(this.animateKey);
     this.animateItem = null
   }
 
   loadAnimation(): void {
     this.destroyAnimation()
+    this.animateKey = `${this.tag}${new Date().getTime()}`;
     this.animateItem = lottie.loadAnimation({
       container: this.canvasRenderingContext,
       renderer: 'canvas',
+      name: this.animateKey,
       loop: Boolean(this.descriptor.props.loop),
       autoplay: Boolean(this.descriptor.props.autoPlay),
       animationData: this.jsonData

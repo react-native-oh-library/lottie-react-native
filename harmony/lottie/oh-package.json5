@@ -9,6 +9,6 @@
   "version": "6.4.1-0.1.5",
   "dependencies": {
     "@rnoh/react-native-openharmony": "file:../react_native_openharmony",
-    "@ohos/lottie": "2.0.11-rc.3"
+    "@ohos/lottie": "2.0.11-rc.6"
   }
 }
