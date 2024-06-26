@@ -39,6 +39,7 @@ export struct LottieAnimationView {
   @State @Watch("onStateChanged") loop: boolean = true
   @State @Watch("onStateChanged") autoPlay: boolean = false
   @State @Watch("onStateChanged") cacheComposition: boolean = true
+  @State  allFrames:number|undefined=0
   private jsonData: AnimationObject | null = {} as AnimationObject
   private jsonDataHashCode: string = ''
   private cleanupCommandCallback?: () => void = undefined
@@ -50,9 +51,8 @@ export struct LottieAnimationView {
 
   aboutToAppear() {
     this.descriptor = this.ctx.descriptorRegistry.getDescriptor<LottieViewDescriptor>(this.tag)
-    this.onDescriptorChanged()
-    this.commandCallback()
     this.subscribeToDescriptorChanges()
+    this.commandCallback()
   }
 
   aboutToDisappear() {
@@ -218,6 +218,7 @@ export struct LottieAnimationView {
       this.onAnimationEnd()
     }
     lottie.destroy(this.animateKey);
+    this.animateItem.destroy(this.animateKey)
     this.animateItem = null
   }
 
@@ -230,17 +231,33 @@ export struct LottieAnimationView {
       name: this.animateKey,
       loop: Boolean(this.descriptor.props.loop),
       autoplay: Boolean(this.descriptor.props.autoPlay),
-      animationData: this.jsonData
+      animationData: this.jsonData,
     })
+    this.animateItem?.addEventListener('data_failed',()=>{
+      console.log('data_failed')
+    })
+    this.animateItem.addEventListener('error',()=>{console.log('error')})
+
+    this.animateItem?.addEventListener('DOMLoaded',()=>{
+      this.allFrames=this.animateItem?.totalFrames
+      this.onDescriptorChanged()
+      //循环播放区间
+      // if(this.descriptor.props.progress!==0){
+      //   const frame = this.getAnimateFrame()
+      //   this.animateItem?.playSegments([frame,this.allFrames],true)
+      //   !this.autoPlay&&this.animateItem?.goToAndStop(frame, true)
+      // }
+    })
+
   }
 
   setProgress(): void {
     const frame = this.getAnimateFrame()
-    if (Boolean(this.descriptor.props.autoPlay)) {
-      this.animateItem?.goToAndPlay(frame, true)
-    } else {
+    // if (Boolean(this.descriptor.props.autoPlay)) {
+    //   this.animateItem?.goToAndPlay(frame, true)
+    // } else {
       this.animateItem?.goToAndStop(frame, true)
-    }
+    // }
   }
 
   setSpeed(): void {
@@ -248,10 +265,12 @@ export struct LottieAnimationView {
   }
 
   setAutoPlay(): void {
-    this.animateItem?.goToAndPlay(this.autoPlay ? 0 : this.getAnimateFrame(), true)
+  this.animateItem?.goToAndPlay(this.getAnimateFrame(), true)
   }
 
   getAnimateFrame(): number {
+    this.animateItem?.playSegments([0,this.allFrames],true)
+    this.animateItem?.pause()
     let firstFrame: number = this.animateItem?.firstFrame ?? 0
     let totalFrames: number = this.animateItem?.totalFrames ?? 0
     return Math.ceil(firstFrame + this.descriptor.props.progress * totalFrames)
@@ -297,6 +316,14 @@ export struct LottieAnimationView {
   play(args: number[]): void {
     const startFrame = args[0]
     const endFrame = args[1]
+    //从进度播放
+    if(this.progress!==0){
+      // const frame = this.getAnimateFrame()
+      // this.animateItem?.playSegments([frame,this.allFrames],true)
+      this.progress=0
+      this.animateItem?.goToAndPlay(this.getAnimateFrame(), true)
+      return
+    }
     if (args.length > 1 && startFrame != -1 && endFrame != -1) {
       if (startFrame > endFrame) {
         this.animateItem?.setSegment(endFrame, startFrame)
