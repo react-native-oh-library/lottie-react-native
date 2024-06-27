@@ -50,7 +50,6 @@ export struct LottieAnimationView {
 
   aboutToAppear() {
     this.descriptor = this.ctx.descriptorRegistry.getDescriptor<LottieViewDescriptor>(this.tag)
-    this.onDescriptorChanged()
     this.commandCallback()
     this.subscribeToDescriptorChanges()
   }
@@ -232,15 +231,14 @@ export struct LottieAnimationView {
       autoplay: Boolean(this.descriptor.props.autoPlay),
       animationData: this.jsonData
     })
+    this.animateItem?.addEventListener('DOMLoaded', () => {
+      this.onDescriptorChanged()
+    })
   }
 
   setProgress(): void {
     const frame = this.getAnimateFrame()
-    if (Boolean(this.descriptor.props.autoPlay)) {
-      this.animateItem?.goToAndPlay(frame, true)
-    } else {
-      this.animateItem?.goToAndStop(frame, true)
-    }
+    this.animateItem?.goToAndStop(frame, true)
   }
 
   setSpeed(): void {
@@ -252,8 +250,8 @@ export struct LottieAnimationView {
   }
 
   getAnimateFrame(): number {
-    let firstFrame: number = this.animateItem?.firstFrame ?? 0
-    let totalFrames: number = this.animateItem?.totalFrames ?? 0
+    const firstFrame: number = this.animateItem?.firstFrame ?? 0
+    const totalFrames: number = this.animateItem?.totalFrames ?? 0
     return Math.ceil(firstFrame + this.descriptor.props.progress * totalFrames)
   }
 
@@ -297,6 +295,12 @@ export struct LottieAnimationView {
   play(args: number[]): void {
     const startFrame = args[0]
     const endFrame = args[1]
+    this.animateItem?.stop()
+    if (this.progress !== 0) {
+      this.progress = 0
+      this.animateItem?.goToAndPlay(this.getAnimateFrame(), true)
+      return
+    }
     if (args.length > 1 && startFrame != -1 && endFrame != -1) {
       if (startFrame > endFrame) {
         this.animateItem?.setSegment(endFrame, startFrame)
@@ -310,7 +314,6 @@ export struct LottieAnimationView {
         }
       }
     }
-    this.animateItem?.stop()
     this.animateItem?.play()
   }
 
