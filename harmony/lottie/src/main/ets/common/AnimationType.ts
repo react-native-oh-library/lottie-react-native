@@ -13,6 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+export interface LottieViewState {}
+
+export interface colorFiltersItem {
+  keypath: string;
+  color: string
+}
+
+export interface layersItem {
+  "ddd"?: number;
+  "ind"?: number;
+  "ty"?: number;
+  "nm"?: string;
+  "sr"?: number;
+  "ks": object;
+  "ao"?: number;
+  "shapes": Array<{ [key: string]: string | number }>
+  "ip"?: number;
+  "op"?: number;
+  "st"?: number;
+  "bm"?: number;
+  [key: string]: string | number | object | [];
+}
 
 export type AnimationObject = {
   v: string
@@ -24,7 +46,7 @@ export type AnimationObject = {
   nm?: string
   ddd?: number
   assets: AnimationAssets[]
-  layers: Object[]
+  layers: layersItem[]
   markers?: Object[]
 }
 
@@ -37,7 +59,7 @@ export type AnimationAssets = {
   e: number
 }
 
-export type LottieViewProps = {
+export interface LottieViewProps {
   resizeMode: string
   renderMode: string
   sourceName: string
@@ -51,4 +73,25 @@ export type LottieViewProps = {
   enableMergePathsAndroidForKitKatAndAbove: boolean
   hardwareAccelerationAndroid: boolean
   cacheComposition: boolean
+  colorFilters: Array<colorFiltersItem>
+}
+export enum LOTTLE_STRING{
+  onStateChanged='onStateChanged',
+  progress='progress',
+  speed='speed',
+  loop='loop',
+  autoPlay='autoPlay',
+  onAnimationFinish='onAnimationFinish',
+  http='http',
+  contentType='Content-Type',
+  json='application/json',
+  canvas='canvas',
+  DOMLoaded='DOMLoaded',
+  colorFilters='colorFilters',
+  complete='complete',
+  play='play',
+  reset='reset',
+  pause='pause',
+  resume='resume'
+
 }

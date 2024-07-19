@@ -37,6 +37,7 @@ class LottieAnimationViewJSIBinder : public ViewComponentJSIBinder{
         object.setProperty(rt, "enableMergePathsAndroidForKitKatAndAbove", "boolean");
         object.setProperty(rt, "hardwareAccelerationAndroid", "boolean");
         object.setProperty(rt, "cacheComposition", "boolean");
+        object.setProperty(rt, "colorFilters", "string");
         return object;
     }
 
