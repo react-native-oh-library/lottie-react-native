@@ -39,6 +39,7 @@ public:
     std::string sourceJson{};
     std::string sourceURL{};
     std::string imageAssetsFolder{};
+    std::string colorFilters{};
     Float progress{0.0};
     Float speed{1.0};
     bool loop{true};

@@ -45,6 +45,7 @@ public:
                              props->enableMergePathsAndroidForKitKatAndAbove)
                 .addProperty("hardwareAccelerationAndroid", props->hardwareAccelerationAndroid)
                 .addProperty("cacheComposition", props->cacheComposition)
+                .addProperty("colorFilters", props->colorFilters)
                 .build();
         }
         return napiViewProps;

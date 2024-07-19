@@ -25,7 +25,6 @@ LottieAnimationViewProps::LottieAnimationViewProps(const PropsParserContext &con
                                                    const LottieAnimationViewProps &sourceProps,
                                                    const RawProps &rawProps)      
     : ViewProps(context, sourceProps, rawProps),
-
     resizeMode(convertRawProp(context, rawProps, "resizeMode", sourceProps.resizeMode, {})),
     renderMode(convertRawProp(context, rawProps, "renderMode", sourceProps.renderMode, {})),
     sourceName(convertRawProp(context, rawProps, "sourceName", sourceProps.sourceName, {})),
@@ -41,7 +40,8 @@ LottieAnimationViewProps::LottieAnimationViewProps(const PropsParserContext &con
                        sourceProps.enableMergePathsAndroidForKitKatAndAbove, {false})),
     hardwareAccelerationAndroid(convertRawProp(context, rawProps, "hardwareAccelerationAndroid",
                                                sourceProps.hardwareAccelerationAndroid, {false})),
-    cacheComposition(convertRawProp(context, rawProps, "cacheComposition", sourceProps.cacheComposition, {true}))
+    cacheComposition(convertRawProp(context, rawProps, "cacheComposition", sourceProps.cacheComposition, {true})),
+    colorFilters(convertRawProp(context, rawProps, "colorFilters", sourceProps.colorFilters, {}))
     {}
 } // namespace react
 } // namespace facebook
