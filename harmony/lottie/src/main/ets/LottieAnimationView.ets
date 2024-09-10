@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-import { Descriptor, RNOHContext, RNViewBase } from '@rnoh/react-native-openharmony';
+import { Descriptor, RNOHContext, RNViewBase, ViewBaseProps } from '@rnoh/react-native-openharmony';
 import lottie from '@ohos/lottie';
 import { AnimationItem } from '@ohos/lottie';
 import http from '@ohos.net.http';
-import { AnimationObject, colorFiltersItem, layersItem, LottieViewProps,LOTTLE_STRING } from './common/AnimationType';
+import { colorFiltersItem, LottieViewProps, LOTTLE_STRING } from './common/AnimationType';
+import { AnimationObject, layersItem } from './common/Animation';
 import { LottieCompositionCache } from './LottieCompositionCache';
 import { convertImageFolder } from './LottieAnimationTools';
 import { getHashCode } from './common/TextUtils';
 import Logger from './Logger';
 
 export const LOTTIE_TYPE: string = 'LottieAnimationView';
-export type LottieViewDescriptor = Descriptor<'LottieAnimationView', LottieViewProps>;
+
+interface LottieViewState {}
+
+export type LottieViewDescriptor = Descriptor<'LottieAnimationView', ViewBaseProps, LottieViewState, LottieViewProps>;
 
 @Component
 export struct LottieAnimationView {
@@ -33,11 +37,11 @@ export struct LottieAnimationView {
   tag: number = 0;
   @State descriptor: LottieViewDescriptor = {} as LottieViewDescriptor;
   private unregisterDescriptorChangesListener?: () => void = undefined;
-  @State @Watch(LOTTLE_STRING.onStateChanged) progress: number = 0;
-  @State @Watch(LOTTLE_STRING.onStateChanged) speed: number = 1;
-  @State @Watch(LOTTLE_STRING.onStateChanged) loop: boolean = true;
-  @State @Watch(LOTTLE_STRING.onStateChanged) autoPlay: boolean = false;
-  @State @Watch(LOTTLE_STRING.onStateChanged) cacheComposition: boolean = true;
+  @State @Watch('onStateChanged') progress: number = 0;
+  @State @Watch('onStateChanged') speed: number = 1;
+  @State @Watch('onStateChanged') loop: boolean = true;
+  @State @Watch('onStateChanged') autoPlay: boolean = false;
+  @State @Watch('onStateChanged') cacheComposition: boolean = true;
   private jsonData: AnimationObject | null = {} as AnimationObject;
   private jsonDataHashCode: string = '';
   private cleanupCommandCallback?: () => void = undefined;
@@ -51,6 +55,7 @@ export struct LottieAnimationView {
     this.descriptor = this.ctx.descriptorRegistry.getDescriptor<LottieViewDescriptor>(this.tag);
     this.commandCallback();
     this.subscribeToDescriptorChanges();
+    console.log(`testlottie:${JSON.stringify(this.descriptor.rawProps)}`)
   }
 
   aboutToDisappear() {
@@ -73,7 +78,7 @@ export struct LottieAnimationView {
   }
 
   onDescriptorChanged(change?: boolean): void {
-    if (this.descriptor.props) {
+    if (this.descriptor.rawProps) {
       this.handleColorFilters();
       this.updateWatchData();
       change && this.parseSourceURL();
@@ -88,14 +93,14 @@ export struct LottieAnimationView {
       case LOTTLE_STRING.progress:
         this.setProgress();
         break;
-      case  LOTTLE_STRING.speed:
+      case LOTTLE_STRING.speed:
         this.setSpeed();
         break;
-      case  LOTTLE_STRING.loop: {
+      case LOTTLE_STRING.loop: {
         this.animateItem.loop = this.loop;
         break;
       }
-      case  LOTTLE_STRING.autoPlay:
+      case LOTTLE_STRING.autoPlay:
         this.setAutoPlay();
         break;
       default:
@@ -127,7 +132,7 @@ export struct LottieAnimationView {
     if (hashCode === this.jsonDataHashCode) {
       return;
     }
-    if (this.descriptor.props.cacheComposition) {
+    if (this.descriptor.rawProps.cacheComposition) {
       const tempJsonObj = this.getCacheData(hashCode);
       if (tempJsonObj) {
         this.jsonData = tempJsonObj;
@@ -144,20 +149,20 @@ export struct LottieAnimationView {
   }
 
   parseSourceURL(): void {
-    if (!this.descriptor?.props) {
+    if (!this.descriptor?.rawProps) {
       return;
     }
-    if (this.descriptor.props.sourceURL.startsWith( LOTTLE_STRING.http)) {
-      this.cacheProcessing(this.descriptor.props.sourceURL, true);
+    if (this.descriptor.rawProps.sourceURL && this.descriptor.rawProps.sourceURL.startsWith(LOTTLE_STRING.http)) {
+      this.cacheProcessing(this.descriptor.rawProps.sourceURL, true);
     } else {
-      this.cacheProcessing(this.descriptor.props.sourceJson);
+      this.descriptor.rawProps.sourceJson && this.cacheProcessing(this.descriptor.rawProps.sourceJson);
     }
   }
 
   request(url: string, hashCode?: string): void {
     Logger.debug('httpRequest.request url:', url);
     const httpRequest = http.createHttp();
-    httpRequest.request(url, { header: {  [LOTTLE_STRING.contentType]:  LOTTLE_STRING.json} }, (err, data) => {
+    httpRequest.request(url, { header: { [LOTTLE_STRING.contentType]: LOTTLE_STRING.json } }, (err, data) => {
       if (err == undefined && data != undefined) {
         Logger.debug('httpRequest.request success:' + JSON.stringify(data));
         const result: Object = data.result;
@@ -171,18 +176,19 @@ export struct LottieAnimationView {
   }
 
   updateWatchData(): void {
-    this.progress = this.descriptor.props.progress;
-    this.speed = this.descriptor.props.speed;
-    this.loop = Boolean(this.descriptor.props.loop);
-    this.autoPlay = Boolean(this.descriptor.props.autoPlay);
-    this.cacheComposition = Boolean(this.descriptor.props.cacheComposition);
+    this.progress = this.descriptor.rawProps.progress;
+    this.speed = this.descriptor.rawProps.speed;
+    this.loop = Boolean(this.descriptor.rawProps.loop);
+    this.autoPlay = Boolean(this.descriptor.rawProps.autoPlay);
+    this.cacheComposition = Boolean(this.descriptor.rawProps.cacheComposition);
   }
 
   updateJsonData(data: string, hashCode?: string): void {
     try {
-      this.jsonData = convertImageFolder(JSON.parse(data) as AnimationObject, this.descriptor.props.imageAssetsFolder);
+      this.jsonData =
+        convertImageFolder(JSON.parse(data) as AnimationObject, this.descriptor.rawProps.imageAssetsFolder);
       this.initAnimation();
-      this.setCacheData(this.jsonData, hashCode);
+      this.setCacheData(this.jsonData as AnimationObject, hashCode);
     } catch (e) {
       Logger.error('updateJsonData,source parse error');
       this.jsonData = null;
@@ -225,20 +231,40 @@ export struct LottieAnimationView {
     this.animateKey = `${this.tag}${new Date().getTime()}`;
     this.animateItem = lottie.loadAnimation({
       container: this.canvasRenderingContext,
-      renderer:  LOTTLE_STRING.canvas,
+      renderer: LOTTLE_STRING.canvas,
       name: this.animateKey,
-      loop: Boolean(this.descriptor.props.loop),
-      autoplay: Boolean(this.descriptor.props.autoPlay),
+      loop: Boolean(this.descriptor.rawProps.loop),
+      autoplay: Boolean(this.descriptor.rawProps.autoPlay),
       animationData: this.jsonData
     });
-    this.animateItem?.addEventListener( LOTTLE_STRING.DOMLoaded, () => {
+    this.animateItem?.addEventListener(LOTTLE_STRING.DOMLoaded, () => {
+      let upperResizeMode = this.descriptor.rawProps.resizeMode.replace(this.descriptor.rawProps.resizeMode[0],
+        this.descriptor.rawProps.resizeMode[0].toUpperCase())
+      this.ctx.rnInstance.emitComponentEvent(
+        this.descriptor.tag,
+        LOTTIE_TYPE,
+        {
+          type: 'onAnimationLoaded',
+        }
+      );
+      this.animateItem?.setContentMode(upperResizeMode);
       this.onDescriptorChanged();
+    })
+    this.animateItem?.addEventListener(LOTTLE_STRING.data_failed, () => {
+      this.ctx.rnInstance.emitComponentEvent(
+        this.descriptor.tag,
+        LOTTIE_TYPE,
+        {
+          type: 'onAnimationFailure',
+          error: 'data_failed'
+        }
+      );
     })
   }
 
   handleColorFilters(): void {
     const layersData: Array<layersItem> = this.jsonData?.layers ?? [];
-    const colorFiltersData: Array<colorFiltersItem> = this.descriptor.rawProps[ LOTTLE_STRING.colorFilters] ?? [];
+    const colorFiltersData: Array<colorFiltersItem> = this.descriptor.rawProps[LOTTLE_STRING.colorFilters] ?? [];
     for (const item of colorFiltersData) {
       const index: number = layersData.findIndex((layersItem: layersItem) => layersItem?.nm === item?.keypath);
       const color: Array<number> = this.getColorByColorFilters(item);
@@ -273,7 +299,7 @@ export struct LottieAnimationView {
   }
 
   setSpeed(): void {
-    this.animateItem?.setSpeed(this.descriptor.props.speed);
+    this.animateItem?.setSpeed(this.descriptor.rawProps.speed);
   }
 
   setAutoPlay(): void {
@@ -283,7 +309,7 @@ export struct LottieAnimationView {
   getAnimateFrame(): number {
     const firstFrame: number = this.animateItem?.firstFrame ?? 0;
     const totalFrames: number = this.animateItem?.totalFrames ?? 0;
-    return Math.ceil(firstFrame + this.descriptor.props.progress * totalFrames);
+    return Math.ceil(firstFrame + this.descriptor.rawProps.progress * totalFrames);
   }
 
   addEventFrameListener(): void {
@@ -292,7 +318,7 @@ export struct LottieAnimationView {
 
   completeEvent(): void {
     //动画播放结束且不再播放动画触发
-    this.animateItem?.addEventListener( LOTTLE_STRING.complete, () => {
+    this.animateItem?.addEventListener(LOTTLE_STRING.complete, () => {
       this.onAnimationFinish(false);
     })
   }
@@ -305,16 +331,16 @@ export struct LottieAnimationView {
           return;
         }
         switch (command) {
-          case  LOTTLE_STRING.play:
+          case LOTTLE_STRING.play:
             this.play(args as number[]);
             break;
-          case  LOTTLE_STRING.reset:
+          case LOTTLE_STRING.reset:
             this.reset();
             break;
-          case  LOTTLE_STRING.pause:
+          case LOTTLE_STRING.pause:
             this.pause();
             break;
-          case  LOTTLE_STRING.resume:
+          case LOTTLE_STRING.resume:
             this.resume();
             break;
           default:
@@ -336,12 +362,12 @@ export struct LottieAnimationView {
     if (args.length > 1 && startFrame != -1 && endFrame != -1) {
       if (startFrame > endFrame) {
         this.animateItem?.setSegment(endFrame, startFrame);
-        if (this.descriptor.props.speed > 0) {
+        if (this.descriptor.rawProps.speed > 0) {
           this.animateItem?.setDirection(-1);
         }
       } else {
         this.animateItem?.setSegment(startFrame, endFrame);
-        if (this.descriptor.props.speed < 0) {
+        if (this.descriptor.rawProps.speed < 0) {
           this.animateItem?.setDirection(-1);
         }
       }

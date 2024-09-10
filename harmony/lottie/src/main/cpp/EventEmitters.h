@@ -31,7 +31,13 @@ public:
         bool isCancelled;
     };
 
+    struct OnAnimationFailure {
+        std::string error;
+    };
+
     void onAnimationFinish(OnAnimationFinish value) const;
+    void onAnimationLoaded() const;
+    void onAnimationFailure(OnAnimationFailure value) const;
 };
 
 } // namespace react

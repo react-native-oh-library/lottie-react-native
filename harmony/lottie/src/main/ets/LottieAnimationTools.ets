@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AnimationObject, AnimationAssets } from './common/AnimationType'
+import { AnimationObject, AnimationAssets } from './common/Animation'
 import { isEmpty } from './common/TextUtils'
 
 export function convertImageFolder(jsonData: AnimationObject, imagesFolder: string): AnimationObject {

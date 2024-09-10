@@ -50,6 +50,8 @@ class LottieAnimationViewJSIBinder : public ViewComponentJSIBinder{
     {
         facebook::jsi::Object events(rt);
         events.setProperty(rt, "topAnimationFinish", createDirectEvent(rt, "onAnimationFinish"));
+        events.setProperty(rt, "topAnimationLoaded", createDirectEvent(rt, "onAnimationLoaded"));
+        events.setProperty(rt, "topAnimationFailure", createDirectEvent(rt, "onAnimationFailure"));
         return events;
     }
 };

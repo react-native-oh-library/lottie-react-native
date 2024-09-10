@@ -28,6 +28,23 @@ void LottieAnimationViewEventEmitter::onAnimationFinish(OnAnimationFinish event)
     });
 }
 
+void LottieAnimationViewEventEmitter::onAnimationLoaded() const
+{
+    dispatchEvent("animationLoaded",[](jsi::Runtime &runtime){
+        auto payload = jsi::Object(runtime);
+		return payload;
+    });
+}
+
+void LottieAnimationViewEventEmitter::onAnimationFailure(OnAnimationFailure event) const
+{
+    dispatchEvent("animationFailure",[event = std::move(event)](jsi::Runtime &runtime){
+        auto payload = jsi::Object(runtime);
+        payload.setProperty(runtime, "error", event.error);
+		return payload;
+    });
+}
+
 } // namespace react
 } // namespace facebook
 
