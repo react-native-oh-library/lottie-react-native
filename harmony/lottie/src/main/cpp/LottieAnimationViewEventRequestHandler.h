@@ -25,13 +25,17 @@
 using namespace facebook;
 namespace rnoh {
 
-enum class LottieAnimationViewEventType { LOTTIE_ANIMATION_FINISH = 0 };
+enum class LottieAnimationViewEventType { LOTTIE_ANIMATION_FINISH = 0, LOTTIE_ANIMATION_LOADED= 1, LOTTIE_ANIMATION_FAILURE=2 };
 
 LottieAnimationViewEventType getLottieEventType(ArkJS &arkJs, napi_value eventObject)
 {
     auto eventType = arkJs.getString(arkJs.getObjectProperty(eventObject, "type"));
     if (eventType == "onAnimationFinish") {
         return LottieAnimationViewEventType::LOTTIE_ANIMATION_FINISH;
+    } else if (eventType == "onAnimationLoaded") {
+         return LottieAnimationViewEventType::LOTTIE_ANIMATION_LOADED;
+    } else if (eventType == "onAnimationFailure") {
+        return LottieAnimationViewEventType::LOTTIE_ANIMATION_FAILURE;
     } else {
         throw std::runtime_error("Unknown Page event type");
     }
@@ -55,6 +59,16 @@ public:
                 bool isCancelled = arkJs.getBoolean(arkJs.getObjectProperty(ctx.payload, "isCancelled"));
                 react::LottieAnimationViewEventEmitter::OnAnimationFinish event{isCancelled};
                 eventEmitter->onAnimationFinish(event);
+                break;
+            }
+             case LottieAnimationViewEventType::LOTTIE_ANIMATION_LOADED: {
+                eventEmitter->onAnimationLoaded();
+                break;
+            }
+             case LottieAnimationViewEventType::LOTTIE_ANIMATION_FAILURE: {
+                std::string error = arkJs.getString (arkJs.getObjectProperty(ctx.payload, "error"));
+                react::LottieAnimationViewEventEmitter::OnAnimationFailure event{error};
+                eventEmitter->onAnimationFailure(event);
                 break;
             }
             default:

@@ -15,7 +15,7 @@
  */
 
 import HashMap from '@ohos.util.HashMap'
-import { AnimationObject } from './common/AnimationType'
+import { AnimationObject } from './common/Animation'
 
 export class LottieCompositionCache {
   private static readonly sInstance: LottieCompositionCache = new LottieCompositionCache()
