@@ -401,12 +401,6 @@ export struct LottieAnimationView {
         .height('100%')
         .onReady(() => this.parseSourceURL())
         .onAreaChange(() => this.resize())
-        .onDisAppear(() => {
-          this.destroyAnimation()
-          if (this.animateKey) {
-            lottie.destroy(this.animateKey)
-          }
-        })
     }
   }
 }
