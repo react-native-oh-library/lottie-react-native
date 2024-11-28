@@ -1,41 +1,30 @@
-/*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (c) 2024 Huawei Device Co., Ltd. All rights reserved
+// Use of this source code is governed by a Apache-2.0 license that can be
+// found in the LICENSE file.
 
-import { Descriptor, RNOHContext, RNViewBase, ViewBaseProps } from '@rnoh/react-native-openharmony';
+import { RNOHContext, RNViewBase } from '@rnoh/react-native-openharmony';
 import lottie from '@ohos/lottie';
 import { AnimationItem } from '@ohos/lottie';
 import http from '@ohos.net.http';
-import { colorFiltersItem, LottieViewProps, LOTTLE_STRING } from './common/AnimationType';
+import { colorFiltersItem, LOTTLE_STRING } from './common/AnimationType';
 import { AnimationObject, layersItem } from './common/Animation';
 import { LottieCompositionCache } from './LottieCompositionCache';
 import { convertImageFolder } from './LottieAnimationTools';
 import { getHashCode } from './common/TextUtils';
-import Logger from './Logger';
-
-export const LOTTIE_TYPE: string = 'LottieAnimationView';
-
-interface LottieViewState {}
-
-export type LottieViewDescriptor = Descriptor<'LottieAnimationView', ViewBaseProps, LottieViewState, LottieViewProps>;
+import { RNOHLogger } from "@rnoh/react-native-openharmony/ts";
+import { RNC } from './generated';
+/**
+ * @deprecated Use LottieAnimationView.NAME instead
+ */
+export const LOTTIE_TYPE: string = RNC.LottieAnimationView.NAME
 
 @Component
 export struct LottieAnimationView {
+  public static readonly NAME = RNC.LottieAnimationView.NAME
   ctx!: RNOHContext;
   tag: number = 0;
-  @State descriptor: LottieViewDescriptor = {} as LottieViewDescriptor;
+  private logger!: RNOHLogger
+  @State descriptorWrapper: RNC.LottieAnimationView.DescriptorWrapper = {} as RNC.LottieAnimationView.DescriptorWrapper;
   private unregisterDescriptorChangesListener?: () => void = undefined;
   @State @Watch('onStateChanged') progress: number = 0;
   @State @Watch('onStateChanged') speed: number = 1;
@@ -50,12 +39,20 @@ export struct LottieAnimationView {
   private animateItem: AnimationItem | null = null;
   private lottieCache = LottieCompositionCache.getInstance();
   private animateKey: string | null = null;
+  private eventEmitter: RNC.LottieAnimationView.EventEmitter | undefined = undefined
 
   aboutToAppear() {
-    this.descriptor = this.ctx.descriptorRegistry.getDescriptor<LottieViewDescriptor>(this.tag);
+    // 创建EventEmitter实例，用于处理事件的订阅和触发
+    this.eventEmitter = new RNC.LottieAnimationView.EventEmitter(this.ctx.rnInstance, this.tag)
+    this.logger = this.ctx!.logger.clone(RNC.LottieAnimationView.NAME)
+    this.onDescriptorWrapperChange(this.ctx.descriptorRegistry.findDescriptorWrapperByTag<RNC.LottieAnimationView.DescriptorWrapper>(this.tag)!)
     this.commandCallback();
     this.subscribeToDescriptorChanges();
-    console.log(`testlottie:${JSON.stringify(this.descriptor.rawProps)}`)
+    this.logger.info(`testlottie:${JSON.stringify(this.descriptorWrapper.props)}`)
+  }
+
+  private onDescriptorWrapperChange(descriptorWrapper: RNC.LottieAnimationView.DescriptorWrapper) {
+    this.descriptorWrapper = descriptorWrapper
   }
 
   aboutToDisappear() {
@@ -71,14 +68,14 @@ export struct LottieAnimationView {
   subscribeToDescriptorChanges(): void {
     this.unregisterDescriptorChangesListener = this.ctx.descriptorRegistry.subscribeToDescriptorChanges(this.tag,
       (newDescriptor: object) => {
-        this.descriptor = (newDescriptor as LottieViewDescriptor);
+        this.descriptorWrapper = (newDescriptor as RNC.LottieAnimationView.DescriptorWrapper);
         this.onDescriptorChanged(true);
       }
     )
   }
 
   onDescriptorChanged(change?: boolean): void {
-    if (this.descriptor.rawProps) {
+    if (this.descriptorWrapper.props) {
       this.handleColorFilters();
       this.updateWatchData();
       change && this.parseSourceURL();
@@ -109,14 +106,7 @@ export struct LottieAnimationView {
   }
 
   onAnimationFinish(isCancelled: boolean): void {
-    this.ctx.rnInstance.emitComponentEvent(
-      this.descriptor.tag,
-      LOTTIE_TYPE,
-      {
-        type: LOTTLE_STRING.onAnimationFinish,
-        isCancelled: isCancelled,
-      }
-    );
+    this.eventEmitter!.emit("animationFinish", {isCancelled: isCancelled});
   }
 
   onAnimationCancel(): void {
@@ -132,7 +122,7 @@ export struct LottieAnimationView {
     if (hashCode === this.jsonDataHashCode) {
       return;
     }
-    if (this.descriptor.rawProps.cacheComposition) {
+    if (this.descriptorWrapper.props.cacheComposition) {
       const tempJsonObj = this.getCacheData(hashCode);
       if (tempJsonObj) {
         this.jsonData = tempJsonObj;
@@ -149,48 +139,50 @@ export struct LottieAnimationView {
   }
 
   parseSourceURL(): void {
-    if (!this.descriptor?.rawProps) {
+    if (!this.descriptorWrapper?.props) {
       return;
     }
-    if (this.descriptor.rawProps.sourceURL && this.descriptor.rawProps.sourceURL.startsWith(LOTTLE_STRING.http)) {
-      this.cacheProcessing(this.descriptor.rawProps.sourceURL, true);
+    if (this.descriptorWrapper.props.sourceURL &&
+    this.descriptorWrapper.props.sourceURL.startsWith(LOTTLE_STRING.http)) {
+      this.cacheProcessing(this.descriptorWrapper.props.sourceURL, true);
     } else {
-      this.descriptor.rawProps.sourceJson && this.cacheProcessing(this.descriptor.rawProps.sourceJson);
+      this.descriptorWrapper.props.sourceJson && this.cacheProcessing(this.descriptorWrapper.props.sourceJson);
     }
   }
 
   request(url: string, hashCode?: string): void {
-    Logger.debug('httpRequest.request url:', url);
+    this.logger.debug('httpRequest.request url:', url);
     const httpRequest = http.createHttp();
     httpRequest.request(url, { header: { [LOTTLE_STRING.contentType]: LOTTLE_STRING.json } }, (err, data) => {
       if (err == undefined && data != undefined) {
-        Logger.debug('httpRequest.request success:' + JSON.stringify(data));
+        this.logger.debug('httpRequest.request success:' + JSON.stringify(data));
         const result: Object = data.result;
         if (result) {
           this.updateJsonData(result as string, hashCode);
         }
       } else {
-        Logger.error('httpRequest.request error:', `errorCode: ${err?.code}`);
+        this.logger.error('httpRequest.request error:', `errorCode: ${err?.code}`);
       }
     })
   }
 
   updateWatchData(): void {
-    this.progress = this.descriptor.rawProps.progress;
-    this.speed = this.descriptor.rawProps.speed;
-    this.loop = Boolean(this.descriptor.rawProps.loop);
-    this.autoPlay = Boolean(this.descriptor.rawProps.autoPlay);
-    this.cacheComposition = Boolean(this.descriptor.rawProps.cacheComposition);
+    this.progress = this.descriptorWrapper.props.progress;
+    this.speed = this.descriptorWrapper.props.speed;
+    this.loop = Boolean(this.descriptorWrapper.props.loop);
+    this.autoPlay = Boolean(this.descriptorWrapper.props.autoPlay);
+    this.cacheComposition = Boolean(this.descriptorWrapper.props.cacheComposition);
   }
 
   updateJsonData(data: string, hashCode?: string): void {
     try {
       this.jsonData =
-        convertImageFolder(JSON.parse(data) as AnimationObject, this.descriptor.rawProps.imageAssetsFolder);
+        convertImageFolder(JSON.parse(data) as AnimationObject,
+          this.descriptorWrapper.props.imageAssetsFolder as string);
       this.initAnimation();
       this.setCacheData(this.jsonData as AnimationObject, hashCode);
     } catch (e) {
-      Logger.error('updateJsonData,source parse error');
+      this.logger.error('updateJsonData,source parse error');
       this.jsonData = null;
     }
   }
@@ -233,38 +225,27 @@ export struct LottieAnimationView {
       container: this.canvasRenderingContext,
       renderer: LOTTLE_STRING.canvas,
       name: this.animateKey,
-      loop: Boolean(this.descriptor.rawProps.loop),
-      autoplay: Boolean(this.descriptor.rawProps.autoPlay),
+      loop: Boolean(this.descriptorWrapper.props.loop),
+      autoplay: Boolean(this.descriptorWrapper.props.autoPlay),
       animationData: this.jsonData
     });
     this.animateItem?.addEventListener(LOTTLE_STRING.DOMLoaded, () => {
-      let upperResizeMode = this.descriptor.rawProps.resizeMode.replace(this.descriptor.rawProps.resizeMode[0],
-        this.descriptor.rawProps.resizeMode[0].toUpperCase())
-      this.ctx.rnInstance.emitComponentEvent(
-        this.descriptor.tag,
-        LOTTIE_TYPE,
-        {
-          type: 'onAnimationLoaded',
-        }
-      );
+      let upperResizeMode =
+        this.descriptorWrapper.props.resizeMode?.replace(this.descriptorWrapper.props.resizeMode[0],
+          this.descriptorWrapper.props.resizeMode[0].toUpperCase())
+      this.eventEmitter!.emit("animationLoaded", {});
       this.animateItem?.setContentMode(upperResizeMode);
       this.onDescriptorChanged();
     })
     this.animateItem?.addEventListener(LOTTLE_STRING.data_failed, () => {
-      this.ctx.rnInstance.emitComponentEvent(
-        this.descriptor.tag,
-        LOTTIE_TYPE,
-        {
-          type: 'onAnimationFailure',
-          error: 'data_failed'
-        }
-      );
+      this.eventEmitter!.emit("animationFailure", {error: 'data_failed'});
     })
   }
 
   handleColorFilters(): void {
     const layersData: Array<layersItem> = this.jsonData?.layers ?? [];
-    const colorFiltersData: Array<colorFiltersItem> = this.descriptor.rawProps[LOTTLE_STRING.colorFilters] ?? [];
+    const colorFiltersData: Array<colorFiltersItem> =
+      this.descriptorWrapper.props.colorFilters as Array<colorFiltersItem>;
     for (const item of colorFiltersData) {
       const index: number = layersData.findIndex((layersItem: layersItem) => layersItem?.nm === item?.keypath);
       const color: Array<number> = this.getColorByColorFilters(item);
@@ -272,9 +253,9 @@ export struct LottieAnimationView {
       const isColor: boolean = color.length === 3;
       if (isIndex && isColor) {
         this.animateItem?.changeColor(color, index + 1);
-        Logger.debug('colorFilters success:' + item?.keypath);
+        this.logger.debug('colorFilters success:' + item?.keypath);
       } else {
-        Logger.error('colorFilters fail:not find keyPath', item?.keypath);
+        this.logger.error('colorFilters fail:not find keyPath', item?.keypath);
       }
     }
   }
@@ -286,10 +267,10 @@ export struct LottieAnimationView {
       const r: number = (processColor >> 16) & 0xff;
       const g: number = (processColor >> 8) & 0xff;
       const b: number = processColor & 0xff;
-      Logger.debug(`getColorByColorFilters, r=${r}, g=${g}, b=${b}`);
+      this.logger.debug(`getColorByColorFilters, r=${r}, g=${g}, b=${b}`);
       return [r, g, b];
     }
-    Logger.error('colorFilters fail:not find color', colorFiltersItem?.keypath);
+    this.logger.error('colorFilters fail:not find color', colorFiltersItem?.keypath);
     return [];
   }
 
@@ -299,7 +280,7 @@ export struct LottieAnimationView {
   }
 
   setSpeed(): void {
-    this.animateItem?.setSpeed(this.descriptor.rawProps.speed);
+    this.animateItem?.setSpeed(this.descriptorWrapper.props.speed);
   }
 
   setAutoPlay(): void {
@@ -309,7 +290,7 @@ export struct LottieAnimationView {
   getAnimateFrame(): number {
     const firstFrame: number = this.animateItem?.firstFrame ?? 0;
     const totalFrames: number = this.animateItem?.totalFrames ?? 0;
-    return Math.ceil(firstFrame + this.descriptor.rawProps.progress * totalFrames);
+    return Math.ceil(firstFrame + this.descriptorWrapper.props.progress * totalFrames);
   }
 
   addEventFrameListener(): void {
@@ -344,7 +325,7 @@ export struct LottieAnimationView {
             this.resume();
             break;
           default:
-            Logger.warn('not find command');
+            this.logger.warn('not find command');
             break;
         }
       })
@@ -362,12 +343,12 @@ export struct LottieAnimationView {
     if (args.length > 1 && startFrame != -1 && endFrame != -1) {
       if (startFrame > endFrame) {
         this.animateItem?.setSegment(endFrame, startFrame);
-        if (this.descriptor.rawProps.speed > 0) {
+        if (this.descriptorWrapper.props.speed > 0) {
           this.animateItem?.setDirection(-1);
         }
       } else {
         this.animateItem?.setSegment(startFrame, endFrame);
-        if (this.descriptor.rawProps.speed < 0) {
+        if (this.descriptorWrapper.props.speed < 0) {
           this.animateItem?.setDirection(-1);
         }
       }
