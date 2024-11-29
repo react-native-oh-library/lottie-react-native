@@ -44,6 +44,7 @@
     "prepack": "npm run build",
     "release": "release-it",
     "lint:swift": "swiftlint ios",
+    "codegen-lib": "react-native codegen-lib-harmony --no-safety-check --npm-package-name lottie-react-native --cpp-output-path ./harmony/lottie/src/main/cpp/generated --ets-output-path ./harmony/lottie/src/main/ets/generated --arkts-components-spec-paths ./src/LottieAnimationViewNativeComponent.ts",
     "lint-fix:swift": "swiftlint --fix ios"
   },
   "peerDependencies": {
@@ -83,7 +84,10 @@
     "react-native-builder-bob": "^0.20.4",
     "react-native-windows": "0.70.20",
     "release-it": "^15.11.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "@react-native-community/cli": "11.3.6",
+    "react-native-harmony-cli": "npm:@react-native-oh/react-native-harmony-cli@^0.0.27"
+
   },
   "contributors": [
     {
