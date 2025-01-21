@@ -225,6 +225,7 @@ export struct LottieAnimationView {
       container: this.canvasRenderingContext,
       renderer: LOTTLE_STRING.canvas,
       name: this.animateKey,
+      autoSkip:false,
       loop: Boolean(this.descriptorWrapper.props.loop),
       autoplay: Boolean(this.descriptorWrapper.props.autoPlay),
       animationData: this.jsonData
