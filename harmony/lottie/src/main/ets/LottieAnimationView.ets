@@ -48,6 +48,7 @@ export struct LottieAnimationView {
     this.onDescriptorWrapperChange(this.ctx.descriptorRegistry.findDescriptorWrapperByTag<RNC.LottieAnimationView.DescriptorWrapper>(this.tag)!)
     this.commandCallback();
     this.subscribeToDescriptorChanges();
+    lottie.bindContext2dToCoordinator(this.canvasRenderingContext)
     this.logger.info(`testlottie:${JSON.stringify(this.descriptorWrapper.props)}`)
   }
 
@@ -63,6 +64,7 @@ export struct LottieAnimationView {
       lottie.destroy(this.animateKey);
     }
     this.animateKey = null;
+    lottie.unbindContext2dFromCoordinator(this.canvasRenderingContext)
   }
 
   subscribeToDescriptorChanges(): void {
@@ -225,7 +227,6 @@ export struct LottieAnimationView {
       container: this.canvasRenderingContext,
       renderer: LOTTLE_STRING.canvas,
       name: this.animateKey,
-      autoSkip:false,
       loop: Boolean(this.descriptorWrapper.props.loop),
       autoplay: Boolean(this.descriptorWrapper.props.autoPlay),
       animationData: this.jsonData
