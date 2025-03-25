@@ -232,12 +232,16 @@ export struct LottieAnimationView {
       animationData: this.jsonData
     });
     this.animateItem?.addEventListener(LOTTLE_STRING.DOMLoaded, () => {
-      let upperResizeMode =
-        this.descriptorWrapper.props.resizeMode?.replace(this.descriptorWrapper.props.resizeMode[0],
-          this.descriptorWrapper.props.resizeMode[0].toUpperCase())
-      this.eventEmitter!.emit("animationLoaded", {});
-      this.animateItem?.setContentMode(upperResizeMode);
-      this.onDescriptorChanged();
+      try{
+        let upperResizeMode =
+          this.descriptorWrapper.props?.resizeMode?.replace(this.descriptorWrapper.props.resizeMode[0],
+            this.descriptorWrapper.props.resizeMode[0].toUpperCase())
+        this.eventEmitter!.emit("animationLoaded", {});
+        this.animateItem?.setContentMode(upperResizeMode);
+        this.onDescriptorChanged();
+      }catch(e) {
+        this.logger.error('DOMLoaded catch error:', e);
+      }
     })
     this.animateItem?.addEventListener(LOTTLE_STRING.data_failed, () => {
       this.eventEmitter!.emit("animationFailure", {error: 'data_failed'});
