@@ -157,7 +157,7 @@ export struct LottieAnimationView {
     const httpRequest = http.createHttp();
     httpRequest.request(url, { header: { [LOTTLE_STRING.contentType]: LOTTLE_STRING.json } }, (err, data) => {
       if (err == undefined && data != undefined) {
-        this.logger.debug('httpRequest.request success:' + JSON.stringify(data));
+        this.logger.debug('httpRequest.request success:', JSON.stringify(data));
         const result: Object = data.result;
         if (result) {
           this.updateJsonData(result as string, hashCode);
@@ -255,7 +255,7 @@ export struct LottieAnimationView {
       const isColor: boolean = color.length === 3;
       if (isIndex && isColor) {
         this.animateItem?.changeColor(color, index + 1);
-        this.logger.debug('colorFilters success:' + item?.keypath);
+        this.logger.debug('colorFilters success:', item?.keypath);
       } else {
         this.logger.error('colorFilters fail:not find keyPath', item?.keypath);
       }
