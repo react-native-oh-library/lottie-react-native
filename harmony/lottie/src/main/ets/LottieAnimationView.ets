@@ -2,7 +2,7 @@
 // Use of this source code is governed by a Apache-2.0 license that can be
 // found in the LICENSE file.
 
-import { RNOHContext, RNViewBase } from '@rnoh/react-native-openharmony';
+import { RNOHContext, RNViewBase, ViewDescriptorWrapperBase } from '@rnoh/react-native-openharmony';
 import lottie from '@ohos/lottie';
 import { AnimationItem } from '@ohos/lottie';
 import http from '@ohos.net.http';
@@ -13,10 +13,20 @@ import { convertImageFolder } from './LottieAnimationTools';
 import { getHashCode } from './common/TextUtils';
 import { RNOHLogger } from "@rnoh/react-native-openharmony/ts";
 import { RNC } from './generated';
+import { AttributeUpdater } from '@kit.ArkUI'
 /**
  * @deprecated Use LottieAnimationView.NAME instead
  */
 export const LOTTIE_TYPE: string = RNC.LottieAnimationView.NAME
+
+class LottieStackModifier extends AttributeUpdater<StackAttribute> {
+  initializeModifier(instance: StackAttribute): void {
+    instance
+      .width('100%')
+      .height('100%')
+  }
+}
+
 
 @Component
 export struct LottieAnimationView {
@@ -40,6 +50,7 @@ export struct LottieAnimationView {
   private lottieCache = LottieCompositionCache.getInstance();
   private animateKey: string | null = null;
   private eventEmitter: RNC.LottieAnimationView.EventEmitter | undefined = undefined
+  private modifier: LottieStackModifier = new LottieStackModifier()
 
   aboutToAppear() {
     // 创建EventEmitter实例，用于处理事件的订阅和触发
@@ -48,12 +59,14 @@ export struct LottieAnimationView {
     this.onDescriptorWrapperChange(this.ctx.descriptorRegistry.findDescriptorWrapperByTag<RNC.LottieAnimationView.DescriptorWrapper>(this.tag)!)
     this.commandCallback();
     this.subscribeToDescriptorChanges();
-    lottie.bindContext2dToCoordinator(this.canvasRenderingContext)
     this.logger.info(`testlottie:${JSON.stringify(this.descriptorWrapper.props)}`)
   }
 
   private onDescriptorWrapperChange(descriptorWrapper: RNC.LottieAnimationView.DescriptorWrapper) {
     this.descriptorWrapper = descriptorWrapper
+    if(descriptorWrapper?.width && descriptorWrapper?.height) {
+      lottie.bindContext2dToCoordinator(this.canvasRenderingContext)
+    }
   }
 
   aboutToDisappear() {
@@ -127,6 +140,7 @@ export struct LottieAnimationView {
     if (this.descriptorWrapper.props.cacheComposition) {
       const tempJsonObj = this.getCacheData(hashCode);
       if (tempJsonObj) {
+        this.updateStackAttr(tempJsonObj)
         this.jsonData = tempJsonObj;
         this.jsonDataHashCode = hashCode;
         this.initAnimation();
@@ -181,6 +195,7 @@ export struct LottieAnimationView {
       this.jsonData =
         convertImageFolder(JSON.parse(data) as AnimationObject,
           this.descriptorWrapper.props.imageAssetsFolder as string);
+      this.updateStackAttr(this.jsonData)
       this.initAnimation();
       this.setCacheData(this.jsonData as AnimationObject, hashCode);
     } catch (e) {
@@ -381,13 +396,24 @@ export struct LottieAnimationView {
     this.animateItem?.resize();
   }
 
+  updateStackAttr(jsonData: AnimationObject): void {
+    let descriptorWrapper =
+      this.ctx.descriptorRegistry.findDescriptorWrapperByTag<ViewDescriptorWrapperBase>(this.tag)
+    if(!descriptorWrapper?.width || !descriptorWrapper?.height) {
+      this.modifier.attribute?.width(jsonData.w).height(jsonData.h)
+    }
+  }
+
   build() {
     RNViewBase({ ctx: this.ctx, tag: this.tag }) {
-      Canvas(this.canvasRenderingContext)
-        .width('100%')
-        .height('100%')
-        .onReady(() => this.parseSourceURL())
-        .onAreaChange(() => this.resize())
+      Stack(){
+        Canvas(this.canvasRenderingContext)
+          .width('100%')
+          .height('100%')
+          .onReady(() => this.parseSourceURL())
+          .onAreaChange(() => this.resize())
+      }
+      .attributeModifier(this.modifier)
     }
   }
 }

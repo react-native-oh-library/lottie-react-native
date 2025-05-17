@@ -63,3 +63,6 @@ example/windows/**/ARM64
 *.jsbundle
 
 *.tgz
+harmony/lottie/oh_modules
+harmony/lottie/BuildProfile.ets
+harmony/lottie/oh-package-lock.json5
