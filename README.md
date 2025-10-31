@@ -1,13 +1,13 @@
-# @react-native-oh-tpl/lottie-react-native
+#  迁移声明
 
-This project is based on [lottie-react-native](https://github.com/react-native-oh-library/lottie-react-native)
+- 本仓库已迁移至 GitCode：[OpenHarmony-SIG/rntpc_lottie-react-native](https://gitcode.com/openharmony-sig/rntpc_lottie-react-native)。
+- 包名已更改为 `@react-native-ohos/lottie-react-native`，支持直接从 npm 下载。
+- 更多详情请查阅新仓库的 README 文件。
+- 本仓库旧版本的文档已归档：[链接](/doc/zh-cn.md)
 
-## Documentation
+# Migration Announcement  
 
-- [中文](https://gitee.com/react-native-oh-library/usage-docs/blob/master/zh-cn/lottie-react-native.md)
-
-- [English](https://gitee.com/react-native-oh-library/usage-docs/blob/master/en/lottie-react-native.md)
-
-## License
-
-This library is licensed under [Apache License 2.0](https://github.com/lottie-react-native/lottie-react-native/blob/master/LICENSE)
+- This repository has been migrated to GitCode：[OpenHarmony-SIG/rntpc_lottie-react-native](https://gitcode.com/openharmony-sig/rntpc_lottie-react-native)       
+- The package name has been changed to `@react-native-ohos/lottie-react-native` and is now available for direct download from npm.
+- For more details, please refer to the README in the new repository.
+- Archived documentation for versions in this repository can be found here: [Link](/doc/en.md)
