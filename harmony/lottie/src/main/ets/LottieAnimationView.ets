@@ -252,16 +252,35 @@ export struct LottieAnimationView {
     const layersData: Array<layersItem> = this.jsonData?.layers ?? [];
     const colorFiltersData: Array<colorFiltersItem> =
       (this.descriptorWrapper.props.colorFilters ?? []) as Array<colorFiltersItem>;
+
     for (const item of colorFiltersData) {
-      const index: number = layersData.findIndex((layersItem: layersItem) => layersItem?.nm === item?.keypath);
-      const color: Array<number> = this.getColorByColorFilters(item);
-      const isIndex: boolean = index !== (-1);
-      const isColor: boolean = color.length === 3;
-      if (isIndex && isColor) {
-        this.animateItem?.changeColor(color, index + 1);
-        this.logger.debug('colorFilters success:', item?.keypath);
-      } else {
-        this.logger.error('colorFilters fail:not find keyPath', item?.keypath);
+      // 添加空值检查
+      if (!item || typeof item.keypath !== 'string') {
+        this.logger.error('colorFilters fail: invalid item or keypath', item);
+        continue;
+      }
+
+      try {
+        const index: number = layersData.findIndex((layersItem: layersItem) => {
+          // 添加空值检查
+          if (!layersItem || typeof layersItem?.nm !== 'string') {
+            return false;
+          }
+          return layersItem?.nm === item?.keypath;
+        });
+
+        const color: Array<number> = this.getColorByColorFilters(item);
+        const isIndex: boolean = index !== (-1);
+        const isColor: boolean = color && color.length === 3;
+        
+        if (isIndex && isColor) {
+          this.animateItem?.changeColor(color, index + 1);
+          this.logger.debug('colorFilters success:', item?.keypath);
+        } else {
+          this.logger.error('colorFilters fail:not find keyPath', item?.keypath);
+        }
+      } catch (error) {
+        this.logger.error('colorFilters error processing item: ', error);
       }
     }
   }
