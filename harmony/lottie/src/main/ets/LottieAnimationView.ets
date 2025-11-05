@@ -222,6 +222,7 @@ export struct LottieAnimationView {
     if (this.animateItem.isPaused === false) {
       this.onAnimationEnd();
     }
+     this.animateItem?.destroy();
     lottie.destroy(this.animateKey);
     this.animateItem = null;
   }
